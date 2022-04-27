@@ -112,15 +112,6 @@ module replay_buffer
     
     assign rd_idx = pre_wr_idx * 'd2;
 
-    //Logic to toggle mux sel line
-    //always_ff@(posedge grst or negedge grst) begin 
-    //  if(rst) begin
-    //    mux_sel <= 'd0;
-    //  end else begin
-    //    mux_sel <= ~mux_sel;
-    //  end
-    //end
-
     assign mux_sel = grst;
     
     //Generating common clock and idx for all buffers
@@ -167,7 +158,7 @@ module replay_buffer
     genvar i;
 
     for(i=0; i<P; i++) begin
-        replay_buffer_per_ip #(.BUFFER_DEPTH(BUFFER_DEPTH), .NUM_INPUTS(NUM_INPUTS)) rbb_ip (.data_in({data_in1[i],data_in2[i]}), .rst(rst), .grst(grst), .clk(clk), .buf_sel(buf_sel), .wr_idx(wr_idx), .rd_idx(rd_idx), .start_count(start_count), .mux_sel(mux_sel), .data_out(data_out[i]));
+        replay_buffer_per_ip #(.BUFFER_DEPTH(10), .NUM_INPUTS(NUM_INPUTS)) rbb_ip (.data_in({data_in1[i],data_in2[i]}), .rst(rst), .grst(grst), .clk(clk), .buf_sel(buf_sel), .wr_idx(wr_idx), .rd_idx(rd_idx), .start_count(start_count), .mux_sel(mux_sel), .data_out(data_out[i]));
     end
     
 endmodule
