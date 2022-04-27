@@ -24,45 +24,18 @@ module replay_buffer_body
     output logic data_out 
 
 );
-
-
-    //parameter BUFFER_DEPTH = 'd16;
     
     bit [BUFFER_DEPTH-1:0] buffer[1:0];
-    //bit buf_sel;
-    //bit [$clog2(BUFFER_DEPTH):0]wr_idx, pre_wr_idx, rd_idx;
-    //bit start_count;
-    
-    //assign rd_idx = pre_wr_idx * 'd2;
+
     assign data_out = buf_sel ? buffer[1][rd_idx] : buffer[0][rd_idx];
     
     always_ff@(posedge clk) begin
         
         if(rst) begin
-            //wr_idx <= 'd0;
-            //pre_wr_idx <= 'd0; 
             buffer[0][wr_idx] <= 'd0; 
             buffer[1][wr_idx] <= 'd0; 
         end
         else begin
-        //    if(start_count) begin
-        //        if(wr_idx > 'd8) begin 
-        //            wr_idx         <= 'd0; 
-        //        end
-        //        else begin
-        //            wr_idx         <= wr_idx + 1'd1; 
-        //        end
-        //        if(pre_wr_idx > 'd3) begin
-        //            pre_wr_idx <= 'd0;
-        //        end
-        //        else begin
-        //            pre_wr_idx <= pre_wr_idx + 'd1;
-        //        end
-        //    end else begin
-        //        wr_idx <= 'd0;
-        //        pre_wr_idx <= 'd0;
-        //    end
-    
             if(buf_sel) begin
                 buffer[0][wr_idx] <= data_in; 
             end else begin 
@@ -72,19 +45,6 @@ module replay_buffer_body
     
     end
     
-    
-    //always_ff @(posedge grst) begin
-    //    if(rst) begin
-    //        start_count <= 'd0;
-    //        buf_sel <= 1'd0;
-    //        
-    //    end
-    //    else begin
-    //        start_count <= 'd1;
-    //        buf_sel <= ~buf_sel;
-    //    end
-    //end
-
 endmodule
 
 module mux #(parameter NUM_INPUTS = 'd2) (
@@ -119,69 +79,6 @@ module replay_buffer_per_ip
 );
 
     wire [NUM_INPUTS-1:0] interim_out;
-    //bit buf_sel;
-    //bit [$clog2(BUFFER_DEPTH):0]wr_idx, pre_wr_idx, rd_idx;
-    //bit start_count;
-    
-    //logic mux_sel;
-    
-    //assign rd_idx = pre_wr_idx * 'd2;
-
-    //Logic to toggle mux sel line
-    //always_ff@(posedge grst) begin // SYNTH FAILED if both edges in sensitivity list
-    //  if(rst) begin
-    //    mux_sel <= 'd0;
-    //  end else begin
-    //    mux_sel <= ~mux_sel;
-    //  end
-    //end
-    
-    ////Generating common clock and idx for all buffers
-    //always_ff@(posedge clk) begin
-    //    
-    //    if(rst) begin
-    //        wr_idx <= 'd0;
-    //        pre_wr_idx <= 'd0; 
-    //    end
-    //    else begin
-    //        if(start_count) begin
-    //            if(wr_idx > 'd8) begin 
-    //                wr_idx         <= 'd0; 
-    //            end
-    //            else begin
-    //                wr_idx         <= wr_idx + 1'd1; 
-    //            end
-    //            if(pre_wr_idx > 'd3) begin
-    //                pre_wr_idx <= 'd0;
-    //            end
-    //            else begin
-    //                pre_wr_idx <= pre_wr_idx + 'd1;
-    //            end
-    //        end else begin
-    //            wr_idx <= 'd0;
-    //            pre_wr_idx <= 'd0;
-    //        end
-    //
-    //        //if(buf_sel) begin
-    //        //    buffer[0][wr_idx] <= data_in; 
-    //        //end else begin 
-    //        //    buffer[1][wr_idx] <= data_in; 
-    //        //end
-    //    end
-    //
-    //end
-
-    //always_ff @(posedge grst) begin
-    //    if(rst) begin
-    //        start_count <= 'd0;
-    //        buf_sel <= 1'd0;
-    //        
-    //    end
-    //    else begin
-    //        start_count <= 'd1;
-    //        buf_sel <= ~buf_sel;
-    //    end
-    //end
 
     genvar i;
     
@@ -205,13 +102,8 @@ module replay_buffer
     input rst,
     input grst,
     input clk,
-    //input buf_sel,
-    //input [$clog2(BUFFER_DEPTH):0]wr_idx,
-    //input [$clog2(BUFFER_DEPTH):0]rd_idx,
-    //input start_count,
     output logic [P-1: 0] data_out 
 );
-    //wire [NUM_INPUTS-1:0] interim_out;
     bit buf_sel;
     bit [$clog2(BUFFER_DEPTH):0]wr_idx, pre_wr_idx, rd_idx;
     bit start_count;
@@ -221,7 +113,7 @@ module replay_buffer
     assign rd_idx = pre_wr_idx * 'd2;
 
     //Logic to toggle mux sel line
-    always_ff@(posedge grst) begin // SYNTH FAILED if both edges in sensitivity list
+    always_ff@(posedge grst) begin // TODO: replay buffer wont work without this SYNTH FAILED if both edges in sensitivity list
       if(rst) begin
         mux_sel <= 'd0;
       end else begin
@@ -254,12 +146,6 @@ module replay_buffer
                 wr_idx <= 'd0;
                 pre_wr_idx <= 'd0;
             end
-    
-            //if(buf_sel) begin
-            //    buffer[0][wr_idx] <= data_in; 
-            //end else begin 
-            //    buffer[1][wr_idx] <= data_in; 
-            //end
         end
     
     end
