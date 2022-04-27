@@ -27,27 +27,24 @@ module multiplexed_column # (parameter P='d64,
      input logic clk,
      input logic grst,
      input logic rstb,
-     output logic [Q-1:0] output_spikes
+     output logic [Q-1:0] output_spikes1,
+     output logic [Q-1:0] output_spikes2
          
 ); 
 
 
-      logic [P-1:0]data_in;
-genvar i,j,k;
+logic [P-1:0]data_in;
+
+genvar i;
 
 /*Replay buffer before Proximal Synapses*/
 generate
 
         for(i=0; i < P; i=i+1) begin 
-                replay_buffer rb({data_in1[i],data_in2[i]},rstb,grst,clk,data_in[i]);
+                replay_buffer_per_ip rb({data_in1[i],data_in2[i]},rstb,grst,clk,data_in[i]);
         end
         
 endgenerate
-
-
-
-
-
 
 
 /* column instantiation*/
@@ -72,9 +69,10 @@ endgenerate
                 .clk(clk),
                 .grst(grst),
                 .rstb(rstb),
-                .output_spikes(output_spikes)
+                .output_spikes(output_spikes1)       //TODO write demuxing
             );
 
 
+assign output_spikes2 = output_spikes1;             //TODO remove after demuxing blok has been written
 
 endmodule

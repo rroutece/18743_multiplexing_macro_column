@@ -9,125 +9,183 @@
 
 
 
-module replay_buffer_body(
-  
-  input data_in,
-  input rst,
-  input grst,
-  input clk,
-  output logic data_out 
+module replay_buffer_body
+#(
+    parameter BUFFER_DEPTH = 'd16
+) (
+    input data_in,
+    input rst,
+    input grst,
+    input clk,
+    input buf_sel,
+    input [$clog2(BUFFER_DEPTH):0]wr_idx,
+    input [$clog2(BUFFER_DEPTH):0]rd_idx,
+    input start_count,
+    output logic data_out 
 
 );
 
-    parameter BUFFER_DEPTH = 'd16;
+
+    //parameter BUFFER_DEPTH = 'd16;
     
     bit [BUFFER_DEPTH-1:0] buffer[1:0];
-    bit [1:0] en;
-    bit enable;
-    bit [$clog2(BUFFER_DEPTH):0]count, pre_idx, idx;
-    bit start_count;
+    //bit buf_sel;
+    //bit [$clog2(BUFFER_DEPTH):0]wr_idx, pre_wr_idx, rd_idx;
+    //bit start_count;
     
-    assign idx = pre_idx * 'd2;
-    assign data_out = enable? buffer[1][idx] : buffer[0][idx];
+    //assign rd_idx = pre_wr_idx * 'd2;
+    assign data_out = buf_sel ? buffer[1][rd_idx] : buffer[0][rd_idx];
     
     always_ff@(posedge clk) begin
         
         if(rst) begin
-            count <= 'd0;
-            pre_idx <= 'd0; 
+            //wr_idx <= 'd0;
+            //pre_wr_idx <= 'd0; 
+            buffer[0][wr_idx] <= 'd0; 
+            buffer[1][wr_idx] <= 'd0; 
         end
         else begin
-            if(start_count) begin
-                if(count > 'd8) begin 
-                    count         <= 'd0; 
-                end
-                else begin
-                    count         <= count + 1'd1; 
-                end
-                if(pre_idx > 'd3) begin
-                    pre_idx <= 'd0;
-                end
-                else begin
-                    pre_idx <= pre_idx + 'd1;
-                end
-            end else begin
-                count <= 'd0;
-                pre_idx <= 'd0;
-            end
+        //    if(start_count) begin
+        //        if(wr_idx > 'd8) begin 
+        //            wr_idx         <= 'd0; 
+        //        end
+        //        else begin
+        //            wr_idx         <= wr_idx + 1'd1; 
+        //        end
+        //        if(pre_wr_idx > 'd3) begin
+        //            pre_wr_idx <= 'd0;
+        //        end
+        //        else begin
+        //            pre_wr_idx <= pre_wr_idx + 'd1;
+        //        end
+        //    end else begin
+        //        wr_idx <= 'd0;
+        //        pre_wr_idx <= 'd0;
+        //    end
     
-            if(enable) begin
-                buffer[0][count] <= data_in; 
+            if(buf_sel) begin
+                buffer[0][wr_idx] <= data_in; 
             end else begin 
-               buffer[1][count] <= data_in; 
+                buffer[1][wr_idx] <= data_in; 
             end
         end
     
     end
     
     
-    always_ff @(posedge grst) begin
-        if(rst) begin
-            en[0] <= 1'd1;
-            en[1] <= 1'd0;
-            start_count <= 'd0;
-            enable <= 1'd0;
-            
-        end
-        else begin
-            en[0] <= en[1];
-            en[1] <= ~en[1];
-            start_count <= 'd1;
-            enable <= ~enable;
-        end
-    end
+    //always_ff @(posedge grst) begin
+    //    if(rst) begin
+    //        start_count <= 'd0;
+    //        buf_sel <= 1'd0;
+    //        
+    //    end
+    //    else begin
+    //        start_count <= 'd1;
+    //        buf_sel <= ~buf_sel;
+    //    end
+    //end
 
 endmodule
 
 module mux #(parameter NUM_INPUTS = 'd2) (
-  input [NUM_INPUTS-1:0] in,
-  input [$clog2(NUM_INPUTS)-1:0] sel,
-  output logic out
+    input [NUM_INPUTS-1:0] in,
+    input [$clog2(NUM_INPUTS)-1:0] sel,
+    output logic out
 );
-
-  always_comb begin
-    out = in[sel];
-  end
+    
+    always_comb begin
+      out = in[sel];
+    end
 
 endmodule
 
 
-module replay_buffer
+module replay_buffer_per_ip
 #(
-  parameter NUM_INPUTS = 'd2
-  ) (
-  
-  input [NUM_INPUTS-1: 0] data_in,
-  input rst,
-  input grst,
-  input clk,
-  output logic data_out 
+    parameter NUM_INPUTS = 'd2,
+    parameter BUFFER_DEPTH = 'd16
+ ) (
+    
+    input [NUM_INPUTS-1: 0] data_in,
+    input rst,
+    input grst,
+    input clk,
+    output logic data_out 
 
 );
 
-  wire [NUM_INPUTS-1:0] interim_out;
+    wire [NUM_INPUTS-1:0] interim_out;
+    bit buf_sel;
+    bit [$clog2(BUFFER_DEPTH):0]wr_idx, pre_wr_idx, rd_idx;
+    bit start_count;
+    
+    logic mux_sel;
+    
+    assign rd_idx = pre_wr_idx * 'd2;
 
-  logic sel;
-
-  always_ff@(posedge grst) begin // SYNTH FAILED if both edges in sensitivity list
-    if(rst) begin
-      sel <= 'd0;
-    end else begin
-      sel <= ~sel;
+    //Logic to toggle mux sel line
+    always_ff@(posedge grst) begin // SYNTH FAILED if both edges in sensitivity list
+      if(rst) begin
+        mux_sel <= 'd0;
+      end else begin
+        mux_sel <= ~mux_sel;
+      end
     end
-  end
+    
+    //Generating common clock and idx for all buffers
+    always_ff@(posedge clk) begin
+        
+        if(rst) begin
+            wr_idx <= 'd0;
+            pre_wr_idx <= 'd0; 
+        end
+        else begin
+            if(start_count) begin
+                if(wr_idx > 'd8) begin 
+                    wr_idx         <= 'd0; 
+                end
+                else begin
+                    wr_idx         <= wr_idx + 1'd1; 
+                end
+                if(pre_wr_idx > 'd3) begin
+                    pre_wr_idx <= 'd0;
+                end
+                else begin
+                    pre_wr_idx <= pre_wr_idx + 'd1;
+                end
+            end else begin
+                wr_idx <= 'd0;
+                pre_wr_idx <= 'd0;
+            end
+    
+            //if(buf_sel) begin
+            //    buffer[0][wr_idx] <= data_in; 
+            //end else begin 
+            //    buffer[1][wr_idx] <= data_in; 
+            //end
+        end
+    
+    end
 
-  genvar i;
-  
-  for(i=0; i<NUM_INPUTS; i++) begin
-    replay_buffer_body rbb (data_in[i],rst,grst,clk,interim_out[i]);
-  end
+    always_ff @(posedge grst) begin
+        if(rst) begin
+            start_count <= 'd0;
+            buf_sel <= 1'd0;
+            
+        end
+        else begin
+            start_count <= 'd1;
+            buf_sel <= ~buf_sel;
+        end
+    end
 
-  mux #(.NUM_INPUTS(NUM_INPUTS)) m0 (.in(interim_out), .sel(sel), .out(data_out));
+    genvar i;
+    
+    for(i=0; i<NUM_INPUTS; i++) begin
+      replay_buffer_body #(.BUFFER_DEPTH(BUFFER_DEPTH)) rbb (.data_in(data_in[i]), .rst(rst), .grst(grst), .clk(clk), .buf_sel(buf_sel), .wr_idx(wr_idx), .rd_idx(rd_idx), .start_count(start_count), .data_out(interim_out[i]));
+    end
+    
+    mux #(.NUM_INPUTS(NUM_INPUTS)) m0 (.in(interim_out), .sel(mux_sel), .out(data_out));
 
 endmodule
 
