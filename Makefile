@@ -10,14 +10,15 @@ help:
 	@echo " make [args.] "
 	@echo ""
 	@echo " Arguments: "
-	@echo "   macrocolumn-sim:  RTL sim. of macrocolumn "
-	@echo "   macrocolumn-wave:  waveform gui of macrocolumn "
-	@echo "   macrocolumn-synth: synthesis run for macrocolumn "
+	@echo "   macrocolumn-sim:  	RTL sim. of macrocolumn "
+	@echo "   macrocolumn-wave:  	waveform gui of macrocolumn "
+	@echo "   macrocolumn-synth: 	synthesis run for macrocolumn "
+	@echo "   clean: 		cleans SIM SYNTH PNR directories "
 	@echo ""
 	@echo " "
 
 SIM := ${CURDIR}/SIM
-SRC:= ${CURDIR}/src
+SRC:= ${CURDIR}/src/rtl
 SYNTH := $(CURDIR)/SYNTH
 
 .SILENT:
@@ -61,7 +62,6 @@ macrocolumn-synth:
 	fi;
 	
 
-.PHONY: cleanall
-cleanall:
+.PHONY: clean
+clean:
 	rm -rf $(CURDIR)/SIM $(CURDIR)/SYNTH $(CURDIR)/PNR
-	#find . -maxdepth 1 -type d | grep "./" | xargs -I {} make clean -C {}
