@@ -8,7 +8,7 @@
 
 */
 
-module wrapper # (parameter P='d64,
+module multiplexed_column # (parameter P='d64,
                   parameter Q='d2,
                   parameter WRES='d3,
                   parameter THRESHOLD='d133
@@ -39,7 +39,7 @@ genvar i,j,k;
 generate
 
         for(i=0; i < P; i=i+1) begin 
-                muxed_replay_buffer rp({data_in1[i],data_in2[i]},rstb,grst,clk,data_in[i]);
+                replay_buffer rb({data_in1[i],data_in2[i]},rstb,grst,clk,data_in[i]);
         end
         
 endgenerate
@@ -54,26 +54,26 @@ endgenerate
 
              
    column  #(
-                        .P(P),
-                        .Q(Q),
-                        .WRES(WRES),
-                        .THRESHOLD(THRESHOLD)
-                        )
+                .P(P),
+                .Q(Q),
+                .WRES(WRES),
+                .THRESHOLD(THRESHOLD)
+            )
                         
-                   col_test (
-                     .input_spikes(data_in),
-                     .w_init(w_init),
-                     .capture_brv(capture_brv),
-                     .minus_brv(minus_brv),
-                     .search_brv(search_brv),
-                     .backoff_brv(backoff_brv),
-                     .min_brv(min_brv),
-                     .F_brv(F_brv),
-                     .clk(clk),
-                     .grst(grst),
-                     .rstb(rstb),
-                     .output_spikes(output_spikes)
-                  );
+            col_test (
+                .input_spikes(data_in),
+                .w_init(w_init),
+                .capture_brv(capture_brv),
+                .minus_brv(minus_brv),
+                .search_brv(search_brv),
+                .backoff_brv(backoff_brv),
+                .min_brv(min_brv),
+                .F_brv(F_brv),
+                .clk(clk),
+                .grst(grst),
+                .rstb(rstb),
+                .output_spikes(output_spikes)
+            );
 
 
 

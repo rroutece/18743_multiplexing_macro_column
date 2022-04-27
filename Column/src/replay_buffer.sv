@@ -9,7 +9,7 @@
 
 
 
-module replay_buffer(
+module replay_buffer_body(
   
   input data_in,
   input rst,
@@ -96,7 +96,7 @@ module mux #(parameter NUM_INPUTS = 'd2) (
 endmodule
 
 
-module muxed_replay_buffer
+module replay_buffer
 #(
   parameter NUM_INPUTS = 'd2
   ) (
@@ -124,7 +124,7 @@ module muxed_replay_buffer
   genvar i;
   
   for(i=0; i<NUM_INPUTS; i++) begin
-    replay_buffer rp (data_in[i],rst,grst,clk,interim_out[i]);
+    replay_buffer_body rbb (data_in[i],rst,grst,clk,interim_out[i]);
   end
 
   mux #(.NUM_INPUTS(NUM_INPUTS)) m0 (.in(interim_out), .sel(sel), .out(data_out));
@@ -132,6 +132,7 @@ module muxed_replay_buffer
 endmodule
 
 
+`ifdef REPLAY_BUFFER_TB
 module buffer_test;
 
    bit rst, grst, clk; 
@@ -174,10 +175,8 @@ module buffer_test;
    $finish;  
    end
 
-
-   
-
 endmodule
+`endif
 
 
 

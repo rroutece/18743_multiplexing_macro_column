@@ -8,3 +8,9 @@
 
 # Ignore .afs files
 .__afs*
+
+# Ignore VCS files
+csrc/
+simv
+simv.daidir/
+
