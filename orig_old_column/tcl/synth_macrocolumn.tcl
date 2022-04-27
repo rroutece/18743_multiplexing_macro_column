@@ -3,7 +3,7 @@ set_host_options -max_cores 16
 set search_path "/afs/andrew.cmu.edu/course/18/743/backend/45nm_Nangate/pdk_v1.3_v2010_12/NangateOpenCellLibrary_PDKv1_3_v2010_12/Front_End/Liberty/NLDM/
 				/afs/ece/support/synopsys/synopsys.release/syn-vJ-2014.09-SP4/libraries/syn 
 				/afs/ece/support/synopsys/2002.09/share/image/usr/local/synopsys/2002.09/libraries/syn/ 
-				../src/rtl/";
+				../../src/rtl/";
 
 set target_library "NangateOpenCellLibrary_typical.db";
 #set symbol_library "cmulib18.sdb";
@@ -19,11 +19,12 @@ set AREA_RPT $REP_DIR/macrocolumn_area.rpt
 set TIME_RPT $REP_DIR/macrocolumn_time.rpt
 set POWER_RPT $REP_DIR/macrocolumn_power.rpt
 
-set top_mdl macrocolumn_sort_32
+set top_mdl column
 define_design_lib WORK -path "./work"
 
 # Small loop to read in several files
-set all_files {../../src/rtl/column.sv}
+#set all_files {../../src/rtl/*.sv}
+set all_files {../../src/rtl/adder.sv ../../src/rtl/column.sv ../../src/rtl/edge2pulse.sv ../../src/rtl/fsm_convert.sv ../../src/rtl/fsm_synapse.sv ../../src/rtl/incdec.sv ../../src/rtl/less_equal.sv ../../src/rtl/neuron_body.sv ../../src/rtl/neuron.sv ../../src/rtl/pac.sv ../../src/rtl/pulse2edge.sv ../../src/rtl/stabilize_func.sv ../../src/rtl/stdp_case_gen.sv ../../src/rtl/stdp.sv ../../src/rtl/wta.sv}
 foreach file $all_files {
  set module_source "$file"
  set both "{$module_source}"

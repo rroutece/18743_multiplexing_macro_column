@@ -50,7 +50,7 @@ replay_buffer #(.P(P)) rb (.data_in1(data_in1), .data_in2(data_in2), .rst(rstb),
                 .THRESHOLD(THRESHOLD)
             )
                         
-            col_test (
+            col (
                 .input_spikes(data_in),
                 .w_init(w_init),
                 .capture_brv(capture_brv),

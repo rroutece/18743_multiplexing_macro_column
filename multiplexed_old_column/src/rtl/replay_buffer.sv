@@ -113,13 +113,15 @@ module replay_buffer
     assign rd_idx = pre_wr_idx * 'd2;
 
     //Logic to toggle mux sel line
-    always_ff@(posedge grst or negedge grst) begin 
-      if(rst) begin
-        mux_sel <= 'd0;
-      end else begin
-        mux_sel <= ~mux_sel;
-      end
-    end
+    //always_ff@(posedge grst or negedge grst) begin 
+    //  if(rst) begin
+    //    mux_sel <= 'd0;
+    //  end else begin
+    //    mux_sel <= ~mux_sel;
+    //  end
+    //end
+
+    assign mux_sel = grst;
     
     //Generating common clock and idx for all buffers
     always_ff@(posedge clk) begin
@@ -174,11 +176,11 @@ endmodule
 module buffer_test;
 
    bit rst, grst, clk; 
-   bit [1:0] data_in;
-   bit data_out; 
+   bit [63:0] data_in1, data_in2;
+   bit [63:0] data_out; 
 
 
-   muxed_replay_buffer #(.NUM_INPUTS(2)) m_rp0 (.data_in(data_in), .rst(rst), .grst(grst), .clk(clk), .data_out(data_out));
+    replay_buffer #(.P(64)) m_rp0 (.data_in1(data_in1), .data_in2(data_in2), .rst(rst), .grst(grst), .clk(clk), .data_out(data_out));
 
 
    always #10 clk = ~clk;
@@ -188,25 +190,29 @@ module buffer_test;
         rst = 1'd1;
         clk = 'd1;
         grst = 'd0;
-        data_in = 'd0;
+        data_in1 = 64'd0;
+        data_in2 = 64'd0;
 
         #60
         rst = 1'd0;
         #10
         for(int i = 0; i < 100; i = i+1) begin 
-               #20 data_in = $random;
+               #20 data_in1 = $random;
+               #20 data_in2 = $random;
         end
 
         rst = 1'd1;
         clk = 'd1;
         grst = 'd0;
-        data_in = 'd0;
+        data_in1 = 64'd0;
+        data_in2 = 64'd0;
 
         #60
         rst = 1'd0;
         #10
         for(int i = 0; i < 100; i = i+1) begin 
-               #20 data_in = $random;
+               #20 data_in1 = $random;
+               #20 data_in2 = $random;
         end
 
    #100     
