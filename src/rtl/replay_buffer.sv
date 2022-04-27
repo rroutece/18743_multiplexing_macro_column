@@ -113,7 +113,7 @@ module replay_buffer
     assign rd_idx = pre_wr_idx * 'd2;
 
     //Logic to toggle mux sel line
-    always_ff@(posedge grst) begin // TODO: replay buffer wont work without this SYNTH FAILED if both edges in sensitivity list
+    always_ff@(posedge grst or negedge grst) begin 
       if(rst) begin
         mux_sel <= 'd0;
       end else begin
