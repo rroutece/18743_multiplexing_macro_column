@@ -17,3 +17,6 @@ simv.daidir/
 # Igone SIM directory
 SIM/
 
+# Igone SYNTH directory
+SYNTH/
+
