@@ -35,16 +35,7 @@ module multiplexed_column # (parameter P='d64,
 
 logic [P-1:0]data_in;
 
-genvar i;
-
-/*Replay buffer before Proximal Synapses*/
-generate
-
-        for(i=0; i < P; i=i+1) begin 
-                replay_buffer_per_ip rb({data_in1[i],data_in2[i]},rstb,grst,clk,data_in[i]);
-        end
-        
-endgenerate
+replay_buffer #(.P(P)) rb (.data_in1(data_in1), .data_in2(data_in2), .rst(rstb), .grst(grst), .clk(clk), .data_out(data_in));
 
 
 /* column instantiation*/
