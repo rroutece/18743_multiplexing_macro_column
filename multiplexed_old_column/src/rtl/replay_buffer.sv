@@ -102,11 +102,12 @@ module replay_buffer
     input rst,
     input grst,
     input clk,
+    input start_count,
     output logic [P-1: 0] data_out 
 );
     bit buf_sel;
     bit [$clog2(BUFFER_DEPTH):0]wr_idx, pre_wr_idx, rd_idx;
-    bit start_count;
+    //bit start_count;
 
     logic mux_sel;
     
@@ -123,17 +124,17 @@ module replay_buffer
         end
         else begin
             if(start_count) begin
-                if(wr_idx > 'd8) begin 
-                    wr_idx         <= 'd0; 
-                end
-                else begin
+                if(wr_idx < BUFFER_DEPTH-1) begin 
                     wr_idx         <= wr_idx + 1'd1; 
                 end
-                if(pre_wr_idx > 'd3) begin
-                    pre_wr_idx <= 'd0;
+                else begin
+                    wr_idx         <= 'd0; 
+                end
+                if(pre_wr_idx < (BUFFER_DEPTH/2)-1) begin
+                    pre_wr_idx <= pre_wr_idx + 'd1;
                 end
                 else begin
-                    pre_wr_idx <= pre_wr_idx + 'd1;
+                    pre_wr_idx <= 'd0;
                 end
             end else begin
                 wr_idx <= 'd0;
@@ -143,22 +144,22 @@ module replay_buffer
     
     end
 
-    always_ff @(posedge grst) begin
-        if(rst) begin
-            start_count <= 'd0;
-            buf_sel <= 1'd0;
-            
-        end
-        else begin
-            start_count <= 'd1;
-            buf_sel <= ~buf_sel;
-        end
-    end
+    //always_ff @(posedge grst) begin
+    //    if(rst) begin
+    //        start_count <= 'd0;
+    //        buf_sel <= 1'd0;
+    //        
+    //    end
+    //    else begin
+    //        start_count <= 'd1;
+    //        buf_sel <= ~buf_sel;
+    //    end
+    //end
 
     genvar i;
 
     for(i=0; i<P; i++) begin
-        replay_buffer_per_ip #(.BUFFER_DEPTH(10), .NUM_INPUTS(NUM_INPUTS)) rbb_ip (.data_in({data_in1[i],data_in2[i]}), .rst(rst), .grst(grst), .clk(clk), .buf_sel(buf_sel), .wr_idx(wr_idx), .rd_idx(rd_idx), .start_count(start_count), .mux_sel(mux_sel), .data_out(data_out[i]));
+        replay_buffer_per_ip #(.BUFFER_DEPTH(BUFFER_DEPTH), .NUM_INPUTS(NUM_INPUTS)) rbb_ip (.data_in({data_in1[i],data_in2[i]}), .rst(rst), .grst(grst), .clk(clk), .buf_sel(buf_sel), .wr_idx(wr_idx), .rd_idx(rd_idx), .start_count(start_count), .mux_sel(mux_sel), .data_out(data_out[i]));
     end
     
 endmodule

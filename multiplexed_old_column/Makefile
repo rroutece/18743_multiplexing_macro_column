@@ -14,7 +14,7 @@ help:
 	@echo "   macrocolumn-wave:  	waveform gui of macrocolumn "
 	@echo "   macrocolumn-synth: 	synthesis run for macrocolumn "
 	@echo "   replay_buffer-sim:  	RTL sim. of Replay Buffer "
-	@echo "   replay_buffer-wave:  	waveform gui of Replay Buffer "
+	@echo "   replay_buffer-wave:	waveform gui of Replay Buffer "
 	@echo "   clean: 		cleans SIM SYNTH PNR directories "
 	@echo ""
 	@echo " "
@@ -30,12 +30,12 @@ macrocolumn-sim:
 	
 	if [ ! -d "$(SIM)" ]; then \
         mkdir $(SIM) && mkdir $(SIM)/macrocolumn;\
-		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top multiplexed_column $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
 	elif [ ! -d "$(SIM)/macrocolumn" ]; then \
         mkdir $(SIM)/macrocolumn;\
-		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top multiplexed_column $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
 	else \
-		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top multiplexed_column $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
 	fi;
 	
 

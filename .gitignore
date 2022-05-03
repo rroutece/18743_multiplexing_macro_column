@@ -4,6 +4,7 @@
 # Ignore all vim temp files
 *.swp
 *.swo
+*.swn
 *~
 
 # Ignore .afs files
