@@ -94,3 +94,4 @@ replay_buffer-wave:
 .PHONY: clean
 clean:
 	rm -rf $(CURDIR)/SIM $(CURDIR)/SYNTH $(CURDIR)/PNR
+
