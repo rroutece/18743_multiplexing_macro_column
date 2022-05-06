@@ -38,16 +38,15 @@ module multiplexed_column # (parameter P='d64,
 
 
 logic [P-1:0]data_in;
-logic [$clog2(GAMMA_CYCLE_LENGTH)-1:0] counter;
+logic [$clog2(GAMMA_CYCLE_LENGTH)-1:0] cycle_counter;
 bit start_count;
 
 start_counting sc0 (.rst(rstb), .grst(grst), .start_count(start_count));
 
-replay_buffer #(.P(P), .BUFFER_DEPTH(GAMMA_CYCLE_LENGTH)) rb (.data_in1(data_in1), .data_in2(data_in2), .rst(rstb), .grst(grst), .clk(clk), .start_count(start_count), .data_out(data_in));
-
-
 //counter 
-cycle_counter #(.GAMMA_CYCLE_LENGTH(GAMMA_CYCLE_LENGTH)) c_counter (.rst(rstb), .clk(clk), .start_count(start_count), .counter(counter));
+cycle_counter #(.GAMMA_CYCLE_LENGTH(GAMMA_CYCLE_LENGTH)) c_counter (.rst(rstb), .clk(clk), .start_count(start_count), .counter(cycle_counter));
+
+replay_buffer #(.P(P), .BUFFER_DEPTH(GAMMA_CYCLE_LENGTH)) rb (.data_in1(data_in1), .data_in2(data_in2), .rst(rstb), .grst(grst), .clk(clk), .start_count(start_count), .wr_idx(cycle_counter), .data_out(data_in));
 
 /* column instantiation*/
 

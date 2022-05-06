@@ -103,11 +103,11 @@ module replay_buffer
     input grst,
     input clk,
     input start_count,
+    input [$clog2(BUFFER_DEPTH):0] wr_idx,
     output logic [P-1: 0] data_out 
 );
     bit buf_sel;
-    bit [$clog2(BUFFER_DEPTH):0]wr_idx, pre_wr_idx, rd_idx;
-    //bit start_count;
+    bit [$clog2(BUFFER_DEPTH):0] pre_wr_idx, rd_idx;
 
     logic mux_sel;
     
@@ -119,17 +119,10 @@ module replay_buffer
     always_ff@(posedge clk) begin
         
         if(rst) begin
-            wr_idx <= 'd0;
             pre_wr_idx <= 'd0; 
         end
         else begin
             if(start_count) begin
-                if(wr_idx < BUFFER_DEPTH-1) begin 
-                    wr_idx         <= wr_idx + 1'd1; 
-                end
-                else begin
-                    wr_idx         <= 'd0; 
-                end
                 if(pre_wr_idx < (BUFFER_DEPTH/2)-1) begin
                     pre_wr_idx <= pre_wr_idx + 'd1;
                 end
@@ -137,24 +130,11 @@ module replay_buffer
                     pre_wr_idx <= 'd0;
                 end
             end else begin
-                wr_idx <= 'd0;
                 pre_wr_idx <= 'd0;
             end
         end
     
     end
-
-    //always_ff @(posedge grst) begin
-    //    if(rst) begin
-    //        start_count <= 'd0;
-    //        buf_sel <= 1'd0;
-    //        
-    //    end
-    //    else begin
-    //        start_count <= 'd1;
-    //        buf_sel <= ~buf_sel;
-    //    end
-    //end
 
     genvar i;
 
@@ -167,49 +147,56 @@ endmodule
 `ifdef REPLAY_BUFFER_TB
 module buffer_test;
 
-   bit rst, grst, clk; 
-   bit [63:0] data_in1, data_in2;
-   bit [63:0] data_out; 
+    parameter GAMMA_CYCLE_LENGTH = 'd18;
 
+    bit rst, grst, clk; 
+    bit [63:0] data_in1, data_in2;
+    bit [63:0] data_out; 
+    logic [$clog2(GAMMA_CYCLE_LENGTH)-1:0] cycle_counter;
+    bit start_count;
+
+    start_counting rb_sc (.rst(rstb), .grst(grst), .start_count(start_count));
+    
+    cycle_counter #(.GAMMA_CYCLE_LENGTH(GAMMA_CYCLE_LENGTH)) rb_c_counter (.rst(rstb), .clk(clk), .start_count(start_count), .counter(cycle_counter));
 
     replay_buffer #(.P(64)) m_rp0 (.data_in1(data_in1), .data_in2(data_in2), .rst(rst), .grst(grst), .clk(clk), .data_out(data_out));
 
 
-   always #10 clk = ~clk;
-   always #100 grst = ~grst;
+    always #10 clk = ~clk;
+    always #100 grst = ~grst;
 
-   initial begin 
-        rst = 1'd1;
-        clk = 'd1;
-        grst = 'd0;
-        data_in1 = 64'd0;
-        data_in2 = 64'd0;
+    initial begin 
+         rst = 1'd1;
+         clk = 'd1;
+         grst = 'd0;
+         data_in1 = 64'd0;
+         data_in2 = 64'd0;
 
-        #60
-        rst = 1'd0;
-        #10
-        for(int i = 0; i < 100; i = i+1) begin 
-               #20 data_in1 = $random;
-               #20 data_in2 = $random;
-        end
+         #60
+         rst = 1'd0;
+         #10
+         for(int i = 0; i < 100; i = i+1) begin 
+                #20 data_in1 = $random;
+                #20 data_in2 = $random;
+         end
 
-        rst = 1'd1;
-        clk = 'd1;
-        grst = 'd0;
-        data_in1 = 64'd0;
-        data_in2 = 64'd0;
+         rst = 1'd1;
+         clk = 'd1;
+         grst = 'd0;
+         data_in1 = 64'd0;
+         data_in2 = 64'd0;
 
-        #60
-        rst = 1'd0;
-        #10
-        for(int i = 0; i < 100; i = i+1) begin 
-               #20 data_in1 = $random;
-               #20 data_in2 = $random;
-        end
+         #60
+         rst = 1'd0;
+         #10
+         for(int i = 0; i < 100; i = i+1) begin 
+                #20 data_in1 = $random;
+                #20 data_in2 = $random;
+         end
 
-   #100     
-   $finish;  
-   end
+    #100     
+    $finish;  
+    end
 
 endmodule
 `endif
