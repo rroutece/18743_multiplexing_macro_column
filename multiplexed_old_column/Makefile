@@ -10,6 +10,8 @@ help:
 	@echo " make [args.] "
 	@echo ""
 	@echo " Arguments: "
+	@echo "   macrocolumn_tb-sim:  	RTL sim. of macrocolumn_tb "
+	@echo "   macrocolumn_tb-wave:  	waveform gui of macrocolumn_tb "
 	@echo "   macrocolumn-sim:  	RTL sim. of macrocolumn "
 	@echo "   macrocolumn-wave:  	waveform gui of macrocolumn "
 	@echo "   macrocolumn-synth: 	synthesis run for macrocolumn "
@@ -25,17 +27,43 @@ SYNTH := $(CURDIR)/SYNTH
 REPLAY_BUFFER_FLAGS = +define+REPLAY_BUFFER_TB
 
 .SILENT:
+.PHONY: macrocolumn_tb-sim
+macrocolumn_tb-sim:
+	
+	if [ ! -d "$(SIM)" ]; then \
+        mkdir $(SIM) && mkdir $(SIM)/macrocolumn_tb;\
+		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+	elif [ ! -d "$(SIM)/macrocolumn_tb" ]; then \
+        mkdir $(SIM)/macrocolumn_tb;\
+		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+	else \
+		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+	fi;
+	
+
+.PHONY: macrocolumn_tb-wave
+macrocolumn_tb-wave:
+	
+	if [ ! -d "$(SIM)" ]; then \
+        @echo "Perform simulation first";\
+	elif [ ! -d "$(SIM)/macrocolumn_tb" ]; then \
+        @echo "Perform simulation first";\
+	else \
+		cd $(SIM)/macrocolumn_tb && ./simv -gui;\
+	fi;
+
+	
 .PHONY: macrocolumn-sim
 macrocolumn-sim:
 	
 	if [ ! -d "$(SIM)" ]; then \
         mkdir $(SIM) && mkdir $(SIM)/macrocolumn;\
-		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top multiplexed_column $(SRC)/*.sv && ./simv;\
 	elif [ ! -d "$(SIM)/macrocolumn" ]; then \
         mkdir $(SIM)/macrocolumn;\
-		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top multiplexed_column $(SRC)/*.sv && ./simv;\
 	else \
-		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn && vcs -sverilog -debug_all -full64 -top multiplexed_column $(SRC)/*.sv && ./simv;\
 	fi;
 	
 

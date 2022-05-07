@@ -36,11 +36,12 @@
 module column #(parameter P='d64,
                 parameter Q='d2,
                 parameter WRES='d3,
-                parameter THRESHOLD='d13
+                parameter THRESHOLD='d13,
+                parameter GAMMA_CYCLE_LENGTH = 'd18
                )
     (
      input logic [P-1:0] input_spikes,
-     input logic [Q-1:0][P-1:0][WRES-1:0] w_init,
+     input logic [1:0][Q-1:0][P-1:0][WRES-1:0] network_w_init, 
      input logic [Q-1:0][P-1:0] capture_brv,
      input logic [Q-1:0][P-1:0] minus_brv,
      input logic [Q-1:0][P-1:0] search_brv,
@@ -50,6 +51,8 @@ module column #(parameter P='d64,
      input logic clk,
      input logic grst,
      input logic rstb,
+     input logic [$clog2(GAMMA_CYCLE_LENGTH)-1:0] cycle_counter,
+     input logic alt_grst,
      output logic [Q-1:0] output_spikes
     );
 
@@ -61,7 +64,25 @@ module column #(parameter P='d64,
     logic [Q-1:0][P-1:0] inc;
     logic [Q-1:0][P-1:0] dec;
     logic [Q-1:0][P-1:0][WRES-1:0] weights;
+    logic [Q-1:0][P-1:0][WRES-1:0] w_init;
+    logic [1:0][Q-1:0][P-1:0][WRES-1:0] network_weights;
+    logic [1:0][Q-1:0][P-1:0][WRES-1:0] network_op_weights;
 
+    assign w_init = alt_grst? network_w_init[1] : network_w_init[0];
+
+    always @(posedge clk) begin
+        if(rstb) begin
+            network_op_weights[0] <= {WRES*P*Q{1'b0}};
+            network_op_weights[1] <= {WRES*P*Q{1'b0}};
+        end else begin
+            if (alt_grst) begin
+                network_op_weights[0] <= weights;
+            end else begin
+                network_op_weights[1] <= weights;
+            end
+        end
+    end
+    
     generate
     for (i = 0; i < P; i = i+ 1)
     begin: edge_input_gen
@@ -124,7 +145,7 @@ module column #(parameter P='d64,
     
             stdp s0 (.inc(inc[i][j]),
                      .dec(dec[i][j]),
-                     .weight_in(weights[i][j]),
+                     .weight_in(network_op_weights[~alt_grst][i][j]),
                      .ein(ein[j]),
                      .eout(eout[i]),
                      .capture_brv(capture_brv[i][j]),

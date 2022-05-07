@@ -24,7 +24,7 @@ define_design_lib WORK -path "./work"
 
 # Small loop to read in several files
 #set all_files {../../src/rtl/multiplexed_column.sv}
-set all_files {../../src/rtl/adder.sv ../../src/rtl/column.sv ../../src/rtl/edge2pulse.sv ../../src/rtl/fsm_convert.sv ../../src/rtl/fsm_synapse.sv ../../src/rtl/incdec.sv ../../src/rtl/less_equal.sv ../../src/rtl/multiplexed_column.sv ../../src/rtl/neuron_body.sv ../../src/rtl/neuron.sv ../../src/rtl/pac.sv ../../src/rtl/pulse2edge.sv ../../src/rtl/replay_buffer.sv ../../src/rtl/stabilize_func.sv ../../src/rtl/stdp_case_gen.sv ../../src/rtl/stdp.sv ../../src/rtl/wta.sv}
+set all_files {../../src/rtl/adder.sv ../../src/rtl/column.sv ../../src/rtl/cycle_counter.sv ../../src/rtl/edge2pulse.sv ../../src/rtl/fsm_convert.sv ../../src/rtl/fsm_synapse.sv ../../src/rtl/incdec.sv ../../src/rtl/less_equal.sv ../../src/rtl/multiplexed_column.sv ../../src/rtl/neuron_body.sv ../../src/rtl/neuron.sv ../../src/rtl/pac.sv ../../src/rtl/pulse2edge.sv ../../src/rtl/replay_buffer.sv ../../src/rtl/simv ../../src/rtl/stabilize_func.sv ../../src/rtl/start_count.sv ../../src/rtl/stdp_case_gen.sv ../../src/rtl/stdp.sv ../../src/rtl/wta.sv}
 foreach file $all_files {
  set module_source "$file"
  set both "{$module_source}"

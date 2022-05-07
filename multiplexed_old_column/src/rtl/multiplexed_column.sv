@@ -20,7 +20,7 @@ module multiplexed_column # (parameter P='d64,
      input logic [P-1:0]data_in1,
      input logic [P-1:0]data_in2,
      
-     input logic [Q-1:0][P-1:0][WRES-1:0] w_init,
+     input logic [1:0][Q-1:0][P-1:0][WRES-1:0] w_init,
      input logic [Q-1:0][P-1:0] capture_brv,
      input logic [Q-1:0][P-1:0] minus_brv,
      input logic [Q-1:0][P-1:0] search_brv,
@@ -40,6 +40,16 @@ module multiplexed_column # (parameter P='d64,
 logic [P-1:0]data_in;
 logic [$clog2(GAMMA_CYCLE_LENGTH)-1:0] cycle_counter;
 bit start_count;
+bit alt_grst_2x; //alternating signal on every grst_2x clk
+
+always @(posedge grst_2x) begin
+    if(rstb) begin
+        alt_grst_2x <= 'd0;
+    end
+    else begin
+        alt_grst_2x <= ~alt_grst_2x;
+    end
+end
 
 start_counting sc0 (.rst(rstb), .grst(grst), .start_count(start_count));
 
@@ -57,12 +67,13 @@ replay_buffer #(.P(P), .BUFFER_DEPTH(GAMMA_CYCLE_LENGTH)) rb (.data_in1(data_in1
                 .P(P),
                 .Q(Q),
                 .WRES(WRES),
-                .THRESHOLD(THRESHOLD)
+                .THRESHOLD(THRESHOLD),
+                .GAMMA_CYCLE_LENGTH(GAMMA_CYCLE_LENGTH)
             )
                         
             col (
                 .input_spikes(data_in),
-                .w_init(w_init),
+                .network_w_init(w_init),
                 .capture_brv(capture_brv),
                 .minus_brv(minus_brv),
                 .search_brv(search_brv),
@@ -70,8 +81,10 @@ replay_buffer #(.P(P), .BUFFER_DEPTH(GAMMA_CYCLE_LENGTH)) rb (.data_in1(data_in1
                 .min_brv(min_brv),
                 .F_brv(F_brv),
                 .clk(clk),
-                .grst(grst),
+                .grst(grst_2x),
                 .rstb(rstb),
+                .cycle_counter(cycle_counter),
+                .alt_grst(alt_grst_2x),
                 .output_spikes(output_spikes1)       //TODO write demuxing
             );
 
@@ -81,26 +94,83 @@ assign output_spikes2 = output_spikes1;             //TODO remove after demuxing
 endmodule
 
 
+`ifdef MULTIPLEXED_COLUMN_TB 
 module macroculumn_tb ();
+    parameter P='d64;
+    parameter Q='d2;
+    parameter WRES='d3;
 
     bit rst, grst, grst_2x, clk;
+    bit [P-1:0]data_in1;
+    bit [P-1:0]data_in2;
+    bit [1:0][Q-1:0][P-1:0][WRES-1:0] w_init;
+    bit [Q-1:0][P-1:0] capture_brv;
+    bit [Q-1:0][P-1:0] minus_brv;
+    bit [Q-1:0][P-1:0] search_brv;
+    bit [Q-1:0][P-1:0] backoff_brv;
+    bit [Q-1:0][P-1:0] min_brv;
+    bit [Q-1:0][(1<<WRES)-3:0] F_brv;
 
-    multiplexed_column #(.GAMMA_CYCLE_LENGTH(18)) mc0 (.rstb(rst), .grst(grst), .grst_2x(grst_2x), .clk(clk));
+    multiplexed_column #(
+                            .GAMMA_CYCLE_LENGTH(36)
+                        ) 
+                    mc0 (
+                            .data_in1(data_in1),
+                            .data_in2(data_in2),
+                            .w_init(w_init),
+                            .capture_brv(capture_brv),
+                            .minus_brv(minus_brv),
+                            .search_brv(search_brv),
+                            .backoff_brv(backoff_brv),
+                            .min_brv(min_brv),
+                            .F_brv(F_brv),
+                            .clk(clk),
+                            .grst(grst),
+                            .grst_2x(grst_2x),
+                            .rstb(rst),
+                            .output_spikes1(),
+                            .output_spikes2()
+                        );
 
     always #10 clk = ~clk;
-    always #180 grst = ~grst;
-    always #90 grst_2x = ~grst_2x;
+    always #360 grst = ~grst;
+    always #180 grst_2x = ~grst_2x;
 
     initial begin
         rst = 1'd1;
         grst = 1'd0;
         grst_2x = 1'd1;
         clk = 1'd1;
+        data_in1 = 'd0;
+        data_in2 = 'd0;
+        w_init[0][0] = $random+'d1;
+        w_init[0][1] = $random+'d2;
+        w_init[1][0] = $random+'d3;
+        w_init[1][1] = $random+'d4;
+        capture_brv = 'd0;
+        minus_brv = 'd0;
+        search_brv = 'd0;
+        backoff_brv = 'd0;
+        min_brv = 'd0;
+        F_brv = 'd0;
 
         #100 rst = 1'd0;
+
+        for(int i = 0; i < 100; i = i+1) begin 
+            #20 data_in1 = $random;
+            #20 data_in2 = $random;
+            #20 capture_brv = $random;
+            #20 minus_brv = $random;
+            #20 search_brv = $random;
+            #20 backoff_brv = $random;
+            #20 min_brv = $random;
+            #20 F_brv = $random;
+        end
+
 
         #10000     
         $finish;  
 
     end
 endmodule
+`endif

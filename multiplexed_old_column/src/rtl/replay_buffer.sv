@@ -18,8 +18,8 @@ module replay_buffer_body
     input grst,
     input clk,
     input buf_sel,
-    input [$clog2(BUFFER_DEPTH):0]wr_idx,
-    input [$clog2(BUFFER_DEPTH):0]rd_idx,
+    input [$clog2(BUFFER_DEPTH)-1:0]wr_idx,
+    input [$clog2(BUFFER_DEPTH)-1:0]rd_idx,
     input start_count,
     output logic data_out 
 
@@ -70,8 +70,8 @@ module replay_buffer_per_ip
     input grst,
     input clk,
     input buf_sel,
-    input [$clog2(BUFFER_DEPTH):0]wr_idx,
-    input [$clog2(BUFFER_DEPTH):0]rd_idx,
+    input [$clog2(BUFFER_DEPTH)-1:0]wr_idx,
+    input [$clog2(BUFFER_DEPTH)-1:0]rd_idx,
     input start_count,
     input mux_sel,
     output logic data_out 
@@ -103,11 +103,11 @@ module replay_buffer
     input grst,
     input clk,
     input start_count,
-    input [$clog2(BUFFER_DEPTH):0] wr_idx,
+    input [$clog2(BUFFER_DEPTH)-1:0] wr_idx,
     output logic [P-1: 0] data_out 
 );
     bit buf_sel;
-    bit [$clog2(BUFFER_DEPTH):0] pre_wr_idx, rd_idx;
+    bit [$clog2(BUFFER_DEPTH)-1:0] pre_wr_idx, rd_idx;
 
     logic mux_sel;
     
