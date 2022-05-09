@@ -29,10 +29,10 @@ logic [GAMMA_CYCLE_LENGTH-1:0] demuxed_buffer2 [1:0];
         if(rst | ~start_count) begin
             demuxed_output_spikes[0] <= 'd0;
             demuxed_output_spikes[1] <= 'd0;
-            demuxed_buffer1[0] = {GAMMA_CYCLE_LENGTH{1'd0}};
-            demuxed_buffer1[1] = {GAMMA_CYCLE_LENGTH{1'd0}};
-            demuxed_buffer2[0] = {GAMMA_CYCLE_LENGTH{1'd0}};
-            demuxed_buffer2[1] = {GAMMA_CYCLE_LENGTH{1'd0}};
+            demuxed_buffer1[0] <= {GAMMA_CYCLE_LENGTH{1'd0}};
+            demuxed_buffer1[1] <= {GAMMA_CYCLE_LENGTH{1'd0}};
+            demuxed_buffer2[0] <= {GAMMA_CYCLE_LENGTH{1'd0}};
+            demuxed_buffer2[1] <= {GAMMA_CYCLE_LENGTH{1'd0}};
         end
         else begin
             if (buf_sel) begin
