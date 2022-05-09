@@ -17,6 +17,8 @@ help:
 	@echo "   macrocolumn-synth: 	synthesis run for macrocolumn "
 	@echo "   replay_buffer-sim:  	RTL sim. of Replay Buffer "
 	@echo "   replay_buffer-wave:	waveform gui of Replay Buffer "
+	@echo "   rb_demux-sim:  	RTL sim. of Replay Buffer Demux "
+	@echo "   rb_demux-wave:	waveform gui of Replay Buffer Demux "
 	@echo "   clean: 		cleans SIM SYNTH PNR directories "
 	@echo ""
 	@echo " "
@@ -25,6 +27,8 @@ SIM := ${CURDIR}/SIM
 SRC:= ${CURDIR}/src/rtl
 SYNTH := $(CURDIR)/SYNTH
 REPLAY_BUFFER_FLAGS = +define+REPLAY_BUFFER_TB
+MUXED_COL_FLAGS = +define+MULTIPLEXED_COLUMN_TB
+RB_DEMUX_TB_FLAGS = +define+RB_DEMUX_TB
 
 .SILENT:
 .PHONY: macrocolumn_tb-sim
@@ -32,12 +36,12 @@ macrocolumn_tb-sim:
 	
 	if [ ! -d "$(SIM)" ]; then \
         mkdir $(SIM) && mkdir $(SIM)/macrocolumn_tb;\
-		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv $(MUXED_COL_FLAGS) && ./simv;\
 	elif [ ! -d "$(SIM)/macrocolumn_tb" ]; then \
         mkdir $(SIM)/macrocolumn_tb;\
-		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv $(MUXED_COL_FLAGS) && ./simv;\
 	else \
-		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv && ./simv;\
+		cd $(SIM)/macrocolumn_tb && vcs -sverilog -debug_all -full64 -top macroculumn_tb $(SRC)/*.sv $(MUXED_COL_FLAGS) && ./simv;\
 	fi;
 	
 
@@ -118,6 +122,33 @@ replay_buffer-wave:
 		cd $(SIM)/replay_buffer && ./simv -gui;\
 	fi;
 	
+
+.PHONY: rb_demux-sim
+rb_demux-sim:
+	
+	if [ ! -d "$(SIM)" ]; then \
+        mkdir $(SIM) && mkdir $(SIM)/replay_buffer_demux;\
+		cd $(SIM)/replay_buffer_demux && vcs -sverilog -debug_all -full64 -top demux_tb $(SRC)/*.sv $(RB_DEMUX_TB_FLAGS) && ./simv;\
+	elif [ ! -d "$(SIM)/replay_buffer_demux" ]; then \
+        mkdir $(SIM)/replay_buffer_demux;\
+		cd $(SIM)/replay_buffer_demux && vcs -sverilog -debug_all -full64 -top demux_tb $(SRC)/*.sv $(RB_DEMUX_TB_FLAGS) && ./simv;\
+	else \
+		cd $(SIM)/replay_buffer_demux && vcs -sverilog -debug_all -full64 -top demux_tb $(SRC)/*.sv $(RB_DEMUX_TB_FLAGS) && ./simv;\
+	fi;
+	
+
+.PHONY: rb_demux-wave
+rb_demux-wave:
+	
+	if [ ! -d "$(SIM)" ]; then \
+        @echo "Perform simulation first";\
+	elif [ ! -d "$(SIM)/replay_buffer_demux" ]; then \
+        @echo "Perform simulation first";\
+	else \
+		cd $(SIM)/replay_buffer_demux && ./simv -gui;\
+	fi;
+	
+
 
 .PHONY: clean
 clean:

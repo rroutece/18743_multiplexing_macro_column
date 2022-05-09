@@ -39,8 +39,10 @@ module multiplexed_column # (parameter P='d64,
 
 logic [P-1:0]data_in;
 logic [$clog2(GAMMA_CYCLE_LENGTH)-1:0] cycle_counter;
+logic [$clog2(GAMMA_CYCLE_LENGTH/2)-1:0] half_cycle_counter;
 bit start_count;
 bit alt_grst_2x; //alternating signal on every grst_2x clk
+logic [Q-1:0] muxed_output_spikes;
 
 always @(posedge grst_2x) begin
     if(rstb) begin
@@ -55,6 +57,8 @@ start_counting sc0 (.rst(rstb), .grst(grst), .start_count(start_count));
 
 //counter 
 cycle_counter #(.GAMMA_CYCLE_LENGTH(GAMMA_CYCLE_LENGTH)) c_counter (.rst(rstb), .clk(clk), .start_count(start_count), .counter(cycle_counter));
+
+cycle_counter #(.GAMMA_CYCLE_LENGTH(GAMMA_CYCLE_LENGTH/2)) c_half_counter (.rst(rstb), .clk(clk), .start_count(start_count), .counter(half_cycle_counter));
 
 replay_buffer #(.P(P), .BUFFER_DEPTH(GAMMA_CYCLE_LENGTH)) rb (.data_in1(data_in1), .data_in2(data_in2), .rst(rstb), .grst(grst), .clk(clk), .start_count(start_count), .wr_idx(cycle_counter), .data_out(data_in));
 
@@ -85,11 +89,26 @@ replay_buffer #(.P(P), .BUFFER_DEPTH(GAMMA_CYCLE_LENGTH)) rb (.data_in1(data_in1
                 .rstb(rstb),
                 .cycle_counter(cycle_counter),
                 .alt_grst(alt_grst_2x),
-                .output_spikes(output_spikes1)       //TODO write demuxing
+                .output_spikes(muxed_output_spikes)       //TODO write demuxing
             );
 
 
-assign output_spikes2 = output_spikes1;             //TODO remove after demuxing blok has been written
+    replay_buffer_demux # (
+                            .Q(Q), 
+                            .GAMMA_CYCLE_LENGTH(GAMMA_CYCLE_LENGTH)
+                          )
+ 
+                    demux_rp ( 
+                        .muxed_output_spikes(muxed_output_spikes),
+                        .clk(clk),
+                        .grst(grst),
+                        .grst_2x(grst_2x),
+                        .rst(rstb),
+                        .start_count(start_count),
+                        .cycle_counter(cycle_counter),
+                        .half_cycle_counter(half_cycle_counter),
+                        .demuxed_output_spikes({output_spikes2,output_spikes1})
+                    ); 
 
 endmodule
 
