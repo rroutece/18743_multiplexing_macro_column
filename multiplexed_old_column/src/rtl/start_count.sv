@@ -1,6 +1,7 @@
 /*
 ================================================================
-* Implements the compression logic of input spikes
+* Implements the a simple count enable that tells us where to 
+* start counting from at reset
 * Authors: Rushat Rout, Rishi Malladi
 * Date: 04/06/2022
 ================================================================

@@ -1,6 +1,7 @@
 /*
 ============================================================================
-* Implements the multiplexing logic of input spikes from different networks 
+* Implements the de-multiplexing logic of multiplexed output signals so that 
+* the outputs corresponding to a specific network are segregated. 
 * Authors: Rushat Rout, Rishi Malladi
 * Date: 04/26/2022
 ============================================================================

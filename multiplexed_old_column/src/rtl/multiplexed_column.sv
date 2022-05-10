@@ -1,6 +1,9 @@
 /*
 ============================================================================
-* Implements the multiplexing logic of input spikes from different networks 
+* Implements the multiplexing of compressed signals from the replay buffer
+* In this design, the multiplexed signals are passed through the column and
+* the processing is done at 2x the normal gamma clock. It generates a multi-
+* plexed version of the output spikes 
 * Authors: Rushat Rout, Rishi Malladi
 * Date: 04/26/2022
 ============================================================================

@@ -1,6 +1,7 @@
 /*
 ================================================================
-* Implements the compression logic of input spikes
+* Implements a counter that counts the number of clock cycles
+* in a gamma-cycle
 * Authors: Rushat Rout, Rishi Malladi
 * Date: 04/06/2022
 ================================================================
