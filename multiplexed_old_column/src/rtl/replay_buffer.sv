@@ -114,6 +114,7 @@ module replay_buffer
     assign rd_idx = pre_wr_idx * 'd2;
 
     assign mux_sel = grst;
+    assign buf_sel = grst;
     
     //Generating common clock and idx for all buffers
     always_ff@(posedge clk) begin
